@@ -5,6 +5,7 @@
     <div v-for="item in items" :key="item.id">
       <h2>{{ item.name }}</h2>
       <p>{{ item.description }}</p>
+      <p>Created by: {{ item.user }}</p>
       <button @click="deleteItem(item.id)">Delete</button>
     </div>
   </div>
@@ -25,7 +26,11 @@
   },
   methods: {
     fetchItems() {
-      axios.get('http://localhost:8000/api/items/')
+  axios.get('http://localhost:8000/api/items/', {
+    headers: {
+      'Authorization': `Token ${localStorage.getItem('token')}`
+    }
+  })
         .then(response => {
           this.items = response.data;
         })

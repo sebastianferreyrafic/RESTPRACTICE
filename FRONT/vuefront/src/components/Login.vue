@@ -16,41 +16,51 @@
 </template>
   
 <script>
-import axios from 'axios'
+import axios from 'axios';
 
 export default {
-    data() {
-        return {
-            username: '',
-            password: ''
-        }
-    },
-    methods: {
-        login() {
-            axios.defaults.headers.common["Authorization"] = ""
-            const formData = {
-                username: this.username,
-                password: this.password
-            }
-
-            axios.post('http://localhost:8000/auth/token/login/', formData)
-                .then(response => {
-                    console.log(response.data + 'this is the response data'); // Log the response data
-                    const token = response.data.auth_token;
-                    console.log(token + 'this is the token')
-                    axios.defaults.headers.common["Authorization"] = "Token " + token
-                    localStorage.setItem('token', token);
-                    localStorage.setItem('username', this.username); // Store the username in the local storage
-                    this.isLoggedIn = true; // Update the isLoggedIn data property
-                    // this.$forceUpdate(); this did not work
-                    this.$router.push('/');
-                })
-                .catch(error => {
-                    console.error(error.response)
-                    // Here you should handle the error
-                })
-        }
+  data() {
+    return {
+      username: '',
+      password: ''
     }
+  },
+  methods: {
+    login() {
+      axios.defaults.headers.common["Authorization"] = ""
+      const formData = {
+        username: this.username,
+        password: this.password
+      }
+
+      axios.post('http://localhost:8000/auth/token/login/', formData)
+        .then(response => {
+          const token = response.data.auth_token;
+          axios.defaults.headers.common["Authorization"] = "Token " + token
+          localStorage.setItem('token', token);
+          localStorage.setItem('username', this.username);
+
+          // Store the user ID in localStorage
+          axios.get('http://localhost:8000/auth/users/me/', {
+            headers: {
+              'Authorization': `Token ${token}`
+            }
+          })
+            .then(response => {
+              const userId = response.data.id;
+              localStorage.setItem('userId', userId);
+              this.$router.push('/');
+            })
+            .catch(error => {
+              console.error(error.response);
+            });
+        })
+        .catch(error => {
+          console.error(error.response);
+        });
+    }
+  }
 }
+
 </script>
   
